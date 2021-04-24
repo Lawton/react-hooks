@@ -53,25 +53,14 @@ function Game() {
 
   function selectSquare(square) {
     if (winner || currentSquares[square]) return
-    // 🐨 first, if there's already winner or there's already a value at the
-    // given square index (like someone clicked a square that's already been
-    // clicked), then return early so we don't make any state changes
-    //
-    // 🦉 It's typically a bad idea to mutate or directly change state in React.
-    // Doing so can lead to subtle bugs that can easily slip into production.
-    //
-    // 🐨 make a copy of the squares array
-    // 💰 `[...squares]` will do it!)
+
     const squaresCopy = [...currentSquares]
-    //
-    // 🐨 set the value of the square that was selected
-    // 💰 `squaresCopy[square] = nextValue`
     squaresCopy[square] = nextValue
-    //
-    // 🐨 set the squares to your copy
-    // setSquares(squaresCopy)
-    setHistory([...history.slice(0, currentTurn + 1), squaresCopy])
-    setCurrentTurn(currentTurn + 1)
+
+    const newHistory = history.slice(0, currentTurn + 1)
+
+    setHistory([...newHistory, squaresCopy])
+    setCurrentTurn(newHistory.length)
   }
 
   function restart() {
@@ -102,14 +91,12 @@ function Game() {
 
 function calculateMoves(history, currentTurn, setCurrentTurn) {
   return history.map((element, index) => {
+    const isCurrentStep = index === currentTurn
     return (
       <li key={index}>
-        <button
-          disabled={index === currentTurn}
-          onClick={() => setCurrentTurn(index)}
-        >
+        <button disabled={isCurrentStep} onClick={() => setCurrentTurn(index)}>
           {index === 0 ? `Go to game start` : `Go to move #${index}`}
-          {index === currentTurn && ` (current)`}
+          {isCurrentStep && ` (current)`}
         </button>
       </li>
     )
