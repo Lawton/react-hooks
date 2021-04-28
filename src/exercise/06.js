@@ -17,35 +17,43 @@ function PokemonInfo({pokemonName}) {
   // 🐨 Have state for the pokemon (null)
   const [pokemon, setPokemon] = React.useState(null)
   const [error, setError] = React.useState(null)
+  const [status, setStatus] = React.useState('idle')
   // 🐨 use React.useEffect where the callback should be called whenever the
   // pokemon name changes.
   React.useEffect(() => {
     if (!pokemonName) return
-    setPokemon(null)
-    setError(null)
+    setStatus('pending')
     fetchPokemon(pokemonName)
       .then(pokemonData => {
         setPokemon(pokemonData)
+        setStatus('resolved')
       })
-      .catch(setError)
+      .catch(error => {
+        setError(error)
+        setStatus('rejected')
+      })
   }, [pokemonName])
 
-  if (error)
-    return (
-      <div role="alert">
-        There was an error:{' '}
-        <pre style={{whiteSpace: 'normal'}}>{error.message}</pre>
-      </div>
-    )
-  return pokemonName ? (
-    pokemon ? (
-      <PokemonDataView pokemon={pokemon} />
-    ) : (
-      <PokemonInfoFallback name={pokemonName} />
-    )
-  ) : (
-    ' Submit a pokemon'
-  )
+  switch (status) {
+    case 'idle': {
+      return 'Submit a pokemon'
+    }
+    case 'pending': {
+      return <PokemonInfoFallback name={pokemonName} />
+    }
+    case 'resolved': {
+      return <PokemonDataView pokemon={pokemon} />
+    }
+    case 'rejected': {
+      return (
+        <div role="alert">
+          There was an error:{' '}
+          <pre style={{whiteSpace: 'normal'}}>{error.message}</pre>
+        </div>
+      )
+    }
+  }
+
   // 💰 DON'T FORGET THE DEPENDENCIES ARRAY!
   // 💰 if the pokemonName is falsy (an empty string) then don't bother making the request (exit early).
   // 🐨 before calling `fetchPokemon`, make sure to update the loading state
