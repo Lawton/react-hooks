@@ -15,11 +15,12 @@ import {
 
 import {ErrorBoundary} from 'react-error-boundary'
 
-function ErrorFallback({error}) {
+function ErrorFallback({error, resetErrorBoundary}) {
   return (
     <div role="alert">
       There was an error:{' '}
       <pre style={{whiteSpace: 'normal'}}>{error.message}</pre>
+      <button onClick={resetErrorBoundary}>Try again</button>
     </div>
   )
 }
@@ -29,8 +30,9 @@ function PokemonInfo({pokemonName}) {
   const [state, setState] = React.useState({
     pokemon: null,
     error: null,
-    status: 'idle',
+    status: pokemonName ? 'pending' : 'idle',
   })
+  console.log(state)
   const {pokemon, error, status} = state
   // 🐨 use React.useEffect where the callback should be called whenever the
   // pokemon name changes.
@@ -74,7 +76,13 @@ function App() {
       <PokemonForm pokemonName={pokemonName} onSubmit={handleSubmit} />
       <hr />
       <div className="pokemon-info">
-        <ErrorBoundary FallbackComponent={ErrorFallback} key={pokemonName}>
+        <ErrorBoundary
+          FallbackComponent={ErrorFallback}
+          onReset={() => {
+            setPokemonName('')
+          }}
+          resetKeys={[pokemonName]}
+        >
           <PokemonInfo pokemonName={pokemonName} />
         </ErrorBoundary>
       </div>
